@@ -2,6 +2,8 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
+#include <conio.h>
+
 
 using namespace std;
 
@@ -108,14 +110,16 @@ void search(Node*& head, string data, bool isFound) {
            
             isFound = true;
             foundAcc = isFound;
+            
             studentPassword = temp->prev->data;
             return;
         }
+        isFound = false;
 
         temp = temp->next;
         cnt++;
     }
-    cout << "User not found :( " << endl;
+    /*cout << "User not found :( " << endl;*/
 }
 
 
@@ -158,7 +162,7 @@ void RegisterStudent(Node* &head, Node* &tail) {
         cout << "2) Login Existing Account " << endl;
         cout << "3) Login as Admin " << endl;
         cout << "4) Exit " << endl;
-
+        cout << endl;
 
         cout << "Enter Choice: ";
         int loginChoice;
@@ -166,13 +170,53 @@ void RegisterStudent(Node* &head, Node* &tail) {
 
         switch (loginChoice) {
         case 1: {
-            cout << "Assign Username: ";
-            cin >> studName;
-            cout << endl;
+            bool nameExist = false;
+            int attempts = 0;
+            int maxattempts = 5;
+            
+            while (attempts < maxattempts)
+            {
+                foundAcc = false;
+                studName = "";
+                cout << "Assign Username: ";
+                cin >> studName;
+
+                
+
+                search(head, studName, foundAcc);
+                
+                if (foundAcc == false) {
+                    break;
+                }
+                else if (foundAcc == true) {
+                    cout << "This username already exists!" << endl;
+                    cout << "Press \"Enter\" to try again or \"Esc\" to proceed to Main Menu" << endl;
+
+                  
+                    char ch;
+                    while (true) {
+                        if (_kbhit()) { 
+                            ch = _getch(); 
+                            break;
+                        }
+                    }
+
+                    if (ch == 13) { 
+                        std::cout << "Enter pressed. Trying again." << std::endl;
+                        continue;
+                    }
+                    else if (ch == 27) { 
+                        std::cout << "Esc pressed. Returning to main menu." << std::endl;
+                        RegisterStudent(head, tail);
+                        return; 
+                    }
+                }
+            }
+
 
             cout << "Assign Password: ";
             cin >> studentPassword;
-            cout << endl;
+            
 
             GenidNum();
 
@@ -181,7 +225,7 @@ void RegisterStudent(Node* &head, Node* &tail) {
             tail->next = studentNode;
             tail = studentNode;
 
-            studentNode->balance = 100; // Assign default balance.
+            studentNode->balance = 100; 
             insertend(tail, studName);
             insertend(tail, idNum);
 
@@ -193,7 +237,7 @@ void RegisterStudent(Node* &head, Node* &tail) {
             break;
         }
         case 2: {
-            //login_student(head);
+            
             loginStudentUpdated(head);
             break;
         }
@@ -207,8 +251,9 @@ void RegisterStudent(Node* &head, Node* &tail) {
         }
 
 
-        cout << "Continue? 0=yes 1=no";
+        cout << "Continue? 0=yes 1=no: ";
         cin >> cont;
+        cout << endl;
 
 
     }
@@ -277,7 +322,7 @@ void student(Node* studentNode) {
 
 
 
-//Updated student login it would be better to update this one if youre ok with it
+//Updated student login 
 void loginStudentUpdated(Node*& head) {
     string inputPass;
     string inputId;
@@ -306,6 +351,7 @@ void loginStudentUpdated(Node*& head) {
 
                     if (trycnt >= maxAttempts) {
                         cout << "Maximum login attempts reached. Returning to the main menu.\n";
+                       
                         return;
                     }
                 }
