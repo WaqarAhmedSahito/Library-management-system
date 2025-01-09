@@ -5,155 +5,156 @@
 
 using namespace std;
 
-// Variables
+// Global variables
 int quantity;
-string studName;
-string idNum;
-string studentPassword;
-string adminPass = "1234";
-bool foundAcc = false;
+string studname;
+string idnum;
+string studentpassword;
+string adminpass = "1234";
+bool foundacc = false;
 
-// Linked Node
-class BookNode {
+// Book node class
+class booknode {
 public:
-    string username;
-    string bookName;
-    int quantity;
-    BookNode* next;
-    BookNode* prev;
-    
-    BookNode(string username) {
-        this->username;
-        this->next = NULL;
-        this->prev = NULL;
+    string username; // Student who borrowed the book
+    string bookname; // Name of the book
+    int quantity;    // Quantity of the book
+    booknode* next;
+    booknode* prev;
+
+    // Constructor
+    booknode(string username, string bookname, int quantity = 1) {
+        this->username = username;
+        this->bookname = bookname;
+        this->quantity = quantity;
+        this->next = nullptr;
+        this->prev = nullptr;
     }
 };
 
-
-class Node {
+// User node class
+class node {
 public:
     string username;
     string password;
     int balance;
-    Node* next;
-    Node* prev;
+    node* next;
+    node* prev;
 
-    Node(string username, string password, int balance = 100) {
+    // Constructor
+    node(string username, string password, int balance = 100) {
         this->username = username;
         this->password = password;
         this->balance = balance;
-        this->next = NULL;
-        this->prev = NULL;
+        this->next = nullptr;
+        this->prev = nullptr;
     }
 };
 
-// Function Prototypes
-void login_admin(Node*& head);
-void admin(Node*& head);
-void loginStudentUpdated(Node*& head);
-void DepositMoney(Node* studentNode);
-void insertend(Node*& tail, string username, string password);
-void traverse(Node*& head);
-void GenidNum();
-void AdminAccount(Node*& head, Node*& tail);
-void RegisterStudent(Node*& head, Node*& tail);
-void student(Node* studentNode);
+// Global book list pointers
+booknode* bookhead = nullptr;
+booknode* booktail = nullptr;
 
-// Function Definitions
-void insertend(Node*& tail, string username, string password) {
-    Node* temp = new Node(username, password);
+// Function prototypes
+void login_admin(node*& head);
+void admin(node*& head);
+void loginstudentupdated(node*& head, node*& tail);
+void depositmoney(node*& studentnode, node*& tail);
+void insertend(node*& tail, string username, string password);
+void traverse(node*& head);
+void genidnum();
+void adminaccount(node*& head, node*& tail);
+void registerstudent(node*& head, node*& tail);
+void student(node*& studentnode, node*& tail);
+void borrowBooks(node*& studentnode);
+void returnBooks(node*& studentnode);
+void viewBorrowedBooks(node*& studentnode);
+
+// Function definitions
+
+// Insert a new user at the end of the user list
+void insertend(node*& tail, string username, string password) {
+    node* temp = new node(username, password);
     tail->next = temp;
     temp->prev = tail;
     tail = temp;
 }
 
-void traverse(Node*& head) {
-    Node* temp = head;
+// Traverse and display all users
+void traverse(node*& head) {
+    node* temp = head;
 
-    while (temp != NULL) {
+    while (temp != nullptr) {
         cout << "Username: " << temp->username << ", Balance: " << temp->balance << endl;
         temp = temp->next;
     }
     cout << endl;
 }
 
-
-void search(Node*& head, string data, bool isFound) {
-    Node* temp = head;
-    int cnt = 1;
-    while (temp != NULL) {
+// Search for a user in the user list
+void search(node*& head, string data, bool isfound) {
+    node* temp = head;
+    while (temp != nullptr) {
         if (temp->username == data) {
-
-
-            isFound = true;
-            foundAcc = isFound;
-
-            studentPassword = temp->prev->username;
+            isfound = true;
+            foundacc = isfound;
+            studentpassword = temp->password;
             return;
         }
-        isFound = false;
-
         temp = temp->next;
-        cnt++;
     }
-   
+    isfound = false;
 }
 
-
-
-
-void GenidNum() {
-    idNum = "";
+// Generate a random ID number
+void genidnum() {
+    idnum = "";
     char idnumarr[10] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
     for (int i = 0; i <= 4; i++) {
         int randindex = rand() % 10;
-        idNum += idnumarr[randindex];
+        idnum += idnumarr[randindex];
     }
-    cout << "ID number: " << idNum << endl;
+    cout << "ID Number: " << idnum << endl;
 }
 
-void AdminAccount(Node*& head, Node*& tail) {
-    insertend(tail, "Admin", adminPass);
+// Initialize the admin account
+void adminaccount(node*& head, node*& tail) {
+    insertend(tail, "admin", adminpass);
 }
 
-void RegisterStudent(Node*& head, Node*& tail) {
+// Register or login as a student
+void registerstudent(node*& head, node*& tail) {
     int cont = 0;
     while (cont == 0) {
-        cout << "1) Register Account " << endl;
-        cout << "2) Login Existing Account " << endl;
-        cout << "3) Login as Admin " << endl;
-        cout << "4) Exit " << endl;
-        cout << endl;
+        cout << "1) Register Account\n2) Login Existing Account\n3) Login as Admin\n4) Exit\n";
+        cout << "Enter choice: ";
+        int loginchoice;
+        cin >> loginchoice;
 
-        cout << "Enter Choice: ";
-        int loginChoice;
-        cin >> loginChoice;
-
-        switch (loginChoice) {
+        switch (loginchoice) {
         case 1: {
-            bool nameExist = false;
+            bool nameexist = false;
             int attempts = 0;
             int maxattempts = 5;
 
             while (attempts < maxattempts) {
-                studName = "";
-                cout << "Assign Username: ";
-                cin >> studName;
+                studname = "";
+                cout << "Assign username: ";
+                cin >> studname;
 
-                // Check if the username already exists
-                Node* temp = head;
-                while (temp != NULL) {
-                    if (temp->username == studName) {
-                        nameExist = true;
+                node* temp = head;
+                while (temp != nullptr) {
+                    if (temp->username == studname) {
+                        nameexist = true;
                         break;
                     }
                     temp = temp->next;
                 }
 
-                if (nameExist) {
-                    cout << "This username already exists!" << endl;
-                    cout << "Press \"Enter\" to try again or \"Esc\" to proceed to Main Menu" << endl;
+                if (nameexist) {
+                    cout << "This username already exists!\n";
+                    cout << "Press \"Enter\" to try again or \"Esc\" to proceed to main menu.\n";
 
                     char ch;
                     while (true) {
@@ -164,38 +165,35 @@ void RegisterStudent(Node*& head, Node*& tail) {
                     }
 
                     if (ch == 13) {
-                        std::cout << "Enter pressed. Trying again." << std::endl;
-                        nameExist = false;
+                        cout << "Enter pressed. Trying again.\n";
+                        nameexist = false;
                         attempts++;
                         continue;
                     }
                     else if (ch == 27) {
-                        std::cout << "Esc pressed. Returning to main menu." << std::endl;
+                        cout << "Esc pressed. Returning to main menu.\n";
+                        registerstudent(head, tail);
                         return;
                     }
                 }
                 else {
-                    
-                    cout << "Assign Password: ";
-                    cin >> studentPassword;
+                    cout << "Assign password: ";
+                    cin >> studentpassword;
 
-                    GenidNum();
-
-                    
-                    insertend(tail, studName, studentPassword);
-                    cout << "Account created successfully!" << endl;
+                    genidnum();
+                    insertend(tail, studname, studentpassword);
+                    cout << "Account created successfully!\n";
                     break;
                 }
             }
 
             if (attempts >= maxattempts) {
-                cout << "Maximum attempts reached. Returning to main menu." << endl;
+                cout << "Maximum attempts reached. Returning to main menu.\n";
             }
-
             break;
         }
         case 2: {
-            loginStudentUpdated(head);
+            loginstudentupdated(head, tail);
             break;
         }
         case 3: {
@@ -203,7 +201,7 @@ void RegisterStudent(Node*& head, Node*& tail) {
             break;
         }
         case 4: {
-            cout << "Exiting program." << endl;
+            cout << "Exiting program.\n";
             return;
         }
         default:
@@ -211,93 +209,96 @@ void RegisterStudent(Node*& head, Node*& tail) {
             break;
         }
 
-        cout << "Continue? 0=yes 1=no: ";
+        cout << "Continue? 0=Yes 1=No: ";
         cin >> cont;
         cout << endl;
     }
 }
 
-void login_admin(Node*& head) {
+// Admin login
+void login_admin(node*& head) {
     string username, password;
-    cout << "Enter Admin Username: ";
+    cout << "Enter admin username: ";
     cin >> username;
-    cout << "Enter Admin Password: ";
+    cout << "Enter admin password: ";
     cin >> password;
 
-    if (username == "admin" && password == adminPass) {
+    if (username == "admin" && password == adminpass) {
         cout << "Admin logged in successfully.\n";
         admin(head);
     }
     else {
-        cout << "Invalid Admin credentials.\n";
+        cout << "Invalid admin credentials.\n";
     }
 }
 
-void student(Node* studentNode,Node* &head) {
-    cout << "\nStudent options:\n1. View books\n2. Borrow book\n3. Return book\n4. Deposit Money\n5.Exit\n";
+// Student menu
+void student(node*& studentnode, node*& tail) {
+    cout << "\nStudent Options:\n1. View Books\n2. Borrow Book\n3. Return Book\n4. Deposit Money\n5. Logout User\n6. Exit\n";
     int option;
     cin >> option;
 
     switch (option) {
     case 1: {
-        cout << "View Books selected.\n";
-        return;
+        viewBorrowedBooks(studentnode);
+        break;
     }
     case 2: {
-        cout << "Borrow Book selected.\n";
-        borrowBooks(head);
-        return;
+        borrowBooks(studentnode);
+        break;
     }
     case 3: {
-        cout << "Return Book selected.\n";
-        return;
+        returnBooks(studentnode);
+        break;
     }
     case 4: {
-        if (studentNode != nullptr) {
-            DepositMoney(studentNode);
-        }
-        else {
-            cout << "Error: Invalid student node.\n";
-        }
+        depositmoney(studentnode, tail);
         break;
     }
     case 5: {
-        cout << "Exiting Student Menu.\n";
-        return;
+        cout << "User logged out successfully!\n";
+        registerstudent(studentnode, tail);
+        break;
     }
-    default:
+    case 6: {
+        cout << "Exiting student menu.\n";
+        break;
+    }
+    default: {
         cout << "Invalid option. Returning to main menu.\n";
-        return;
+        break;
+    }
     }
 }
 
-void loginStudentUpdated(Node*& head) {
-    string inputPass;
-    string inputId;
+// Student login
+void loginstudentupdated(node*& head, node*& tail) {
+    string inputpass;
+    string inputid;
 
-    cout << "Enter Username: ";
-    cin >> inputId;
+    cout << "Enter username: ";
+    cin >> inputid;
 
-    Node* temp = head;
-    while (temp != NULL) {
-        if (temp->username == inputId) {
+    node* temp = head;
+    while (temp != nullptr) {
+        if (temp->username == inputid) {
             int trycnt = 0; // Counter for password attempts
-            const int maxAttempts = 3;
+            const int maxattempts = 3;
 
-            while (trycnt < maxAttempts) {
-                cout << "Enter Password: ";
-                cin >> inputPass;
+            while (trycnt < maxattempts) {
+                cout << "Enter password: ";
+                cin >> inputpass;
 
-                if (inputPass == temp->password) {
-                    cout << "Welcome " << inputId << ", you are now logged in as a student." << endl;
-                    student(temp,head); // Pass the Node* to the student function.
+                if (inputpass == temp->password) {
+                    cout << "Welcome " << inputid << ", you are now logged in as a student.\n";
+                    student(temp, tail); // Pass the node* to the student function
                     return;
                 }
                 else {
                     trycnt++;
-                    cout << "Invalid password. Attempt " << trycnt << " of " << maxAttempts << "." << endl;
+                    cout << "Invalid password. Attempt " << trycnt << " of " << maxattempts << ".\n";
 
-                    if (trycnt >= maxAttempts) {
+                    if (trycnt >= maxattempts) {
                         cout << "Maximum login attempts reached. Returning to the main menu.\n";
                         return;
                     }
@@ -306,35 +307,35 @@ void loginStudentUpdated(Node*& head) {
         }
         temp = temp->next;
     }
-    cout << endl;
-    cout << "User not found :(.\n";
+    cout << "User not found.\n";
 }
 
-void admin(Node*& head) {
-    cout << "\nAdmin options:\n1. Add book\n2. Edit book\n3. View books\n4. Exit\n5. Generate Users List\n";
+// Admin menu
+void admin(node*& head) {
+    cout << "\nAdmin Options:\n1. Add Book\n2. Edit Book\n3. View Books\n4. Generate Users List\n5. Exit\n";
     int option;
     cin >> option;
 
     switch (option) {
     case 1: {
-        cout << "Add Book selected.\n";
+        cout << "Add book selected.\n";
         break;
     }
     case 2: {
-        cout << "Edit Book selected.\n";
+        cout << "Edit book selected.\n";
         break;
     }
     case 3: {
-        cout << "View Books selected.\n";
+        cout << "View books selected.\n";
         break;
     }
     case 4: {
-        cout << "Exiting Admin Menu....\n";
+        cout << "Generating list of users...\n";
+        traverse(head);
         break;
     }
     case 5: {
-        cout << "Generating List of User....\n";
-        traverse(head);
+        cout << "Exiting admin menu.\n";
         break;
     }
     default:
@@ -343,50 +344,144 @@ void admin(Node*& head) {
     }
 }
 
-void DepositMoney(Node* studentNode) {
-    if (studentNode == nullptr) {
+// Deposit money into student account
+void depositmoney(node*& studentnode, node*& tail) {
+    if (studentnode == nullptr) {
         cout << "Error: No student account found.\n";
         return;
     }
 
-    cout << "Your current balance is: $" << studentNode->balance << endl;
+    cout << "Your current balance is: $" << studentnode->balance << endl;
 
-    int depositAmount;
+    int depositamount;
     cout << "Enter the amount you wish to deposit: ";
-    cin >> depositAmount;
+    cin >> depositamount;
 
-    if (depositAmount > 0) {
-        studentNode->balance += depositAmount;
-        cout << "Deposit successful. Your new balance is: $" << studentNode->balance << endl;
+    if (depositamount > 0) {
+        studentnode->balance += depositamount;
+        cout << "Deposit successful. Your new balance is: $" << studentnode->balance << endl;
     }
     else {
         cout << "Invalid deposit amount. Try again.\n";
     }
+    student(studentnode, tail);
 }
 
 
+// Borrow books
+void borrowBooks(node*& studentnode) {
+    if (studentnode == nullptr) {
+        cout << "Error: No student account found.\n";
+        return;
+    }
 
-void borrowBooks(Node* &head) {
-    
-    //BookNode* Bhead = new BookNode();
+    string bookname;
+    cout << "Book is $20 each\n";
+    cout << "Enter the name of the book you want to borrow: ";
+    cin >> bookname;
 
+    // Check if the student has already borrowed the book
+    booknode* temp = bookhead;
+    while (temp != nullptr) {
+        if (temp->username == studentnode->username && temp->bookname == bookname) {
+            cout << "You have already borrowed this book.\n";
+            return;
+        }
+        temp = temp->next;
+    }
+
+    // Create a new booknode for the borrowed book
+    booknode* newBook = new booknode(studentnode->username, bookname);
+
+    // Add the new booknode to the book list
+    if (bookhead == nullptr) {
+        bookhead = newBook;
+        booktail = newBook;
+    }
+    else {
+        booktail->next = newBook;
+        newBook->prev = booktail;
+        booktail = newBook;
+    }
+    studentnode->balance -= 20;
+    cout << "Book '" << bookname << "' borrowed successfully!\nyour new balance is: "<<studentnode->balance<<endl;
 }
 
 
+// Return books
+void returnBooks(node*& studentnode) {
+    if (studentnode == nullptr) {
+        cout << "Error: No student account found.\n";
+        return;
+    }
 
+    string bookname;
+    cout << "Enter the name of the book you want to return: ";
+    cin >> bookname;
 
+    // Search for the book in the book list
+    booknode* temp = bookhead;
+    while (temp != nullptr) {
+        if (temp->username == studentnode->username && temp->bookname == bookname) {
+           
+            if (temp->prev != nullptr) {
+                temp->prev->next = temp->next;
+            }
+            else {
+                bookhead = temp->next;
+            }
 
+            if (temp->next != nullptr) {
+                temp->next->prev = temp->prev;
+            }
+            else {
+                booktail = temp->prev;
+            }
+
+            delete temp;
+            cout << "Book '" << bookname << "' returned successfully!\n";
+            return;
+        }
+        temp = temp->next;
+    }
+
+    cout << "You have not borrowed this book.\n";
+}
+
+// View borrowed books
+void viewBorrowedBooks(node*& studentnode) {
+    if (studentnode == nullptr) {
+        cout << "Error: No student account found.\n";
+        return;
+    }
+
+    cout << "Books borrowed by " << studentnode->username << ":\n";
+    booknode* temp = bookhead;
+    bool hasBooks = false;
+
+    while (temp != nullptr) {
+        if (temp->username == studentnode->username) {
+            cout << "- " << temp->bookname << endl;
+            hasBooks = true;
+        }
+        temp = temp->next;
+    }
+
+    if (!hasBooks) {
+        cout << "No books borrowed.\n";
+    }
+}
+
+// Main function
 int main() {
-    Node* head = new Node("Admin", adminPass);
-    Node* tail = head;
-    AdminAccount(head, tail);
+    node* head = new node("admin", adminpass);
+    node* tail = head;
+   
 
-    RegisterStudent(head, tail);
+    registerstudent(head, tail);
 
     return 0;
 }
-
-
 
 
 
@@ -402,82 +497,82 @@ int main() {
 //
 //
 //
-//// Variables
-//string studName;
-//string idNum;
-//string studentPassword;
-//string adminPass = "1234";
-//bool foundAcc = false;
+//// variables
+//string studname;
+//string idnum;
+//string studentpassword;
+//string adminpass = "1234";
+//bool foundacc = false;
 //
 //
-////Linked Node
-//class Node {
+////linked node
+//class node {
 //public:
 //    string data;
-//    Node* next;
-//    Node* prev;
+//    node* next;
+//    node* prev;
 //    int balance;
 //
-//    Node(string data) {
+//    node(string data) {
 //        this->data = data;
-//        this->next = NULL;
-//        this->prev = NULL; 
+//        this->next = null;
+//        this->prev = null; 
 //        this->balance = 0;
 //    }
 //};
 //
 //
 //// prototypes
-////void login_student(Node*& head);
-//void login_admin(Node* &head);
-//void admin(Node* &head);
-//void loginStudentUpdated(Node* &head);
-//void DepositMoney(Node* studentNode);
-//void inserthead(Node*& head, string data);
+//void login_student(node*& head);
+//void login_admin(node* &head);
+//void admin(node* &head);
+//void loginstudentupdated(node* &head);
+//void depositmoney(node* studentnode);
+//void inserthead(node*& head, string data);
 //
 //
 //
 //
-//void inserthead (Node*& head, string data) {
-//    Node* temp = new Node(data);
+//void inserthead (node*& head, string data) {
+//    node* temp = new node(data);
 //    temp->next = head;
-//    if (head != NULL) {
+//    if (head != null) {
 //        head->prev = temp;
 //    }
 //    head = temp;
 //}
 //
-//void insertend(Node*& tail, string data) {
-//    Node* temp = new Node(data);
+//void insertend(node*& tail, string data) {
+//    node* temp = new node(data);
 //    tail->next = temp;
 //    temp->prev = tail;
 //    tail = temp;
 //}
 //
-//void insert(Node*& head, int K, string data) {
-//    Node* temp = head;
+//void insert(node*& head, int k, string data) {
+//    node* temp = head;
 //    int cnt = 1;
-//    while (cnt < K - 1) {
+//    while (cnt < k - 1) {
 //        temp = temp->next;
 //        cnt++;
 //    }
-//    Node* Nodenew = new Node(data);
-//    Nodenew->next = temp->next;
-//    if (temp->next != NULL) {
-//        temp->next->prev = Nodenew;
+//    node* nodenew = new node(data);
+//    nodenew->next = temp->next;
+//    if (temp->next != null) {
+//        temp->next->prev = nodenew;
 //    }
-//    temp->next = Nodenew;
-//    Nodenew->prev = temp;
+//    temp->next = nodenew;
+//    nodenew->prev = temp;
 //}
 //
-//void del(Node*& head, int k) {
-//    Node* temp = head;
+//void del(node*& head, int k) {
+//    node* temp = head;
 //    int cnt = 1;
 //
 //    if (k == 1) {
 //        head = head->next;
-//        if (head != NULL) {
-//            head->prev = NULL;
+//        if (head != null) {
+//            head->prev = null;
 //        }
 //        delete temp;
 //        return;
@@ -488,22 +583,22 @@ int main() {
 //        cnt++;
 //    }
 //    temp->prev->next = temp->next;
-//    if (temp->next != NULL) {
+//    if (temp->next != null) {
 //        temp->next->prev = temp->prev;
 //    }
 //    delete temp;
 //}
 //
-
 //
 //
 //
 //
 //
-//void traverse(Node*& head) {
-//    Node* temp = head;
 //
-//    while (temp != NULL) {
+//void traverse(node*& head) {
+//    node* temp = head;
+//
+//    while (temp != null) {
 //        cout << temp->data << " ";
 //        temp = temp->next;
 //    }
@@ -513,25 +608,25 @@ int main() {
 //
 //
 //
-//void GenidNum() {
+//void genidnum() {
 //
-//    idNum = "";
+//    idnum = "";
 //
 //    char idnumarr[10] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 //
 //    for (int i = 0; i <= 4; i++) {
 //        int randindex = rand() % 10;
-//        idNum += idnumarr[randindex];
+//        idnum += idnumarr[randindex];
 //    }
-//    cout << "ID number: " << idNum << endl;
+//    cout << "id number: " << idnum << endl;
 //}
 //
-//void AdminAccount(Node*& head, Node*& tail) {
-//    insertend(tail, adminPass);
+//void adminaccount(node*& head, node*& tail) {
+//    insertend(tail, adminpass);
 //}
 //
 //
-//void GenStudList(Node* &head) {
+//void genstudlist(node* &head) {
 //    traverse(head);
 //
 //}
@@ -542,43 +637,43 @@ int main() {
 //
 //
 //
-//void RegisterStudent(Node* &head, Node* &tail) {
+//void registerstudent(node* &head, node* &tail) {
 //    int cont = 0;
 //    while (cont == 0)
 //    {
-//        cout << "1) Register Account " << endl;
-//        cout << "2) Login Existing Account " << endl;
-//        cout << "3) Login as Admin " << endl;
-//        cout << "4) Exit " << endl;
+//        cout << "1) register account " << endl;
+//        cout << "2) login existing account " << endl;
+//        cout << "3) login as admin " << endl;
+//        cout << "4) exit " << endl;
 //        cout << endl;
 //
-//        cout << "Enter Choice: ";
-//        int loginChoice;
-//        cin >> loginChoice;
+//        cout << "enter choice: ";
+//        int loginchoice;
+//        cin >> loginchoice;
 //
-//        switch (loginChoice) {
+//        switch (loginchoice) {
 //        case 1: {
-//            bool nameExist = false;
+//            bool nameexist = false;
 //            int attempts = 0;
 //            int maxattempts = 5;
 //            
 //            while (attempts < maxattempts)
 //            {
-//                foundAcc = false;
-//                studName = "";
-//                cout << "Assign Username: ";
-//                cin >> studName;
+//                foundacc = false;
+//                studname = "";
+//                cout << "assign username: ";
+//                cin >> studname;
 //
 //                
 //
-//                search(head, studName, foundAcc);
+//                search(head, studname, foundacc);
 //                
-//                if (foundAcc == false) {
+//                if (foundacc == false) {
 //                    break;
 //                }
-//                else if (foundAcc == true) {
-//                    cout << "This username already exists!" << endl;
-//                    cout << "Press \"Enter\" to try again or \"Esc\" to proceed to Main Menu" << endl;
+//                else if (foundacc == true) {
+//                    cout << "this username already exists!" << endl;
+//                    cout << "press \"enter\" to try again or \"esc\" to proceed to main menu" << endl;
 //
 //                  
 //                    char ch;
@@ -590,42 +685,42 @@ int main() {
 //                    }
 //
 //                    if (ch == 13) { 
-//                        std::cout << "Enter pressed. Trying again." << std::endl;
+//                        std::cout << "enter pressed. trying again." << std::endl;
 //                        continue;
 //                    }
 //                    else if (ch == 27) { 
-//                        std::cout << "Esc pressed. Returning to main menu." << std::endl;
-//                        RegisterStudent(head, tail);
+//                        std::cout << "esc pressed. returning to main menu." << std::endl;
+//                        registerstudent(head, tail);
 //                        return; 
 //                    }
 //                }
 //            }
 //
 //
-//            cout << "Assign Password: ";
-//            cin >> studentPassword;
+//            cout << "assign password: ";
+//            cin >> studentpassword;
 //            
 //
-//            GenidNum();
+//            genidnum();
 //
-//            Node* studentNode = new Node(studentPassword);
-//            studentNode->prev = tail;
-//            tail->next = studentNode;
-//            tail = studentNode;
+//            node* studentnode = new node(studentpassword);
+//            studentnode->prev = tail;
+//            tail->next = studentnode;
+//            tail = studentnode;
 //
-//            studentNode->balance = 100; 
+//            studentnode->balance = 100; 
 //            
 //
-//            insertend(tail, studentPassword);
-//            insertend(tail, studName);
-//            insertend(tail, idNum);
+//            insertend(tail, studentpassword);
+//            insertend(tail, studname);
+//            insertend(tail, idnum);
 //            
 //
 //            break;
 //        }
 //        case 2: {
 //            
-//            loginStudentUpdated(head);
+//            loginstudentupdated(head);
 //            break;
 //        }
 //        case 3: {
@@ -633,12 +728,12 @@ int main() {
 //            break;
 //        }
 //        default:
-//            cout << "Invalid choice.\n";
+//            cout << "invalid choice.\n";
 //            break;
 //        }
 //
 //
-//        cout << "Continue? 0=yes 1=no: ";
+//        cout << "continue? 0=yes 1=no: ";
 //        cin >> cont;
 //        cout << endl;
 //
@@ -653,55 +748,55 @@ int main() {
 //
 //
 //// waqar ahmed
-//void login_admin(Node* &head) {
+//void login_admin(node* &head) {
 //    string username, password;
-//    cout << "Enter Admin Username: ";
+//    cout << "enter admin username: ";
 //    cin >> username;
-//    cout << "Enter Admin Password: ";
+//    cout << "enter admin password: ";
 //    cin >> password;
 //
-//    if (username == "admin" && password == adminPass) {
-//        cout << "Admin logged in successfully.\n";
+//    if (username == "admin" && password == adminpass) {
+//        cout << "admin logged in successfully.\n";
 //        admin(head);
 //    }
 //    else {
-//        cout << "Invalid Admin credentials.\n";
+//        cout << "invalid admin credentials.\n";
 //    }
 //}
 //
-//void student(Node* studentNode) {
-//    cout << "\nStudent options:\n1. View books\n2. Borrow book\n3. Return book\n4. Deposit Money\n5.Exit\n";
+//void student(node* studentnode) {
+//    cout << "\nstudent options:\n1. view books\n2. borrow book\n3. return book\n4. deposit money\n5.exit\n";
 //    int option;
 //    cin >> option;
 //
 //    switch (option) {
 //    case 1: {
-//        cout << "View Books selected.\n";
+//        cout << "view books selected.\n";
 //        return;
 //    }
 //    case 2: {
-//        cout << "Borrow Book selected.\n";
+//        cout << "borrow book selected.\n";
 //        return;
 //    }
 //    case 3: {
-//        cout << "Return Book selected.\n";
+//        cout << "return book selected.\n";
 //        return;
 //    }
 //    case 4: {
-//        if (studentNode != nullptr) {
-//            DepositMoney(studentNode); 
+//        if (studentnode != nullptr) {
+//            depositmoney(studentnode); 
 //        }
 //        else {
-//            cout << "Error: Invalid student node.\n";
+//            cout << "error: invalid student node.\n";
 //        }
 //        break;
 //    }
 //    case 5: {
-//        cout << "Exiting Student Menu.\n";
+//        cout << "exiting student menu.\n";
 //        return;
 //    }
 //    default:
-//        cout << "Invalid option. Returning to main menu.\n";
+//        cout << "invalid option. returning to main menu.\n";
 //        return;
 //    }
 //}
@@ -709,35 +804,35 @@ int main() {
 //
 //
 //
-////Updated student login 
-//void loginStudentUpdated(Node*& head) {
-//    string inputPass;
-//    string inputId;
+////updated student login 
+//void loginstudentupdated(node*& head) {
+//    string inputpass;
+//    string inputid;
 //
-//    cout << "Enter Username: ";
-//    cin >> inputId;
+//    cout << "enter username: ";
+//    cin >> inputid;
 //
-//    Node* temp = head;
-//    while (temp != NULL) {
-//        if (temp->data == inputId) {
-//            int trycnt = 0; // Counter for password attempts
-//            const int maxAttempts = 3;
+//    node* temp = head;
+//    while (temp != null) {
+//        if (temp->data == inputid) {
+//            int trycnt = 0; // counter for password attempts
+//            const int maxattempts = 3;
 //
-//            while (trycnt < maxAttempts) {
-//                cout << "Enter Password: ";
-//                cin >> inputPass;
+//            while (trycnt < maxattempts) {
+//                cout << "enter password: ";
+//                cin >> inputpass;
 //
-//                if (inputPass == studentPassword) {
-//                    cout << "Welcome " << inputId << ", you are now logged in as a student." << endl;
-//                    student(temp); // Passed Node* to the student function.
+//                if (inputpass == studentpassword) {
+//                    cout << "welcome " << inputid << ", you are now logged in as a student." << endl;
+//                    student(temp); // passed node* to the student function.
 //                    return;
 //                }
 //                else {
 //                    trycnt++;
-//                    cout << "Invalid password. Attempt " << trycnt << " of " << maxAttempts << "." << endl;
+//                    cout << "invalid password. attempt " << trycnt << " of " << maxattempts << "." << endl;
 //
-//                    if (trycnt >= maxAttempts) {
-//                        cout << "Maximum login attempts reached. Returning to the main menu.\n";
+//                    if (trycnt >= maxattempts) {
+//                        cout << "maximum login attempts reached. returning to the main menu.\n";
 //                       
 //                        return;
 //                    }
@@ -747,7 +842,7 @@ int main() {
 //        temp = temp->next;
 //    }
 //    cout << endl;
-//    cout << "User not found :(.\n";
+//    cout << "user not found :(.\n";
 //}
 //
 //
@@ -755,70 +850,70 @@ int main() {
 //
 //
 //
-//void admin(Node* &head) {
-//    cout << "\nAdmin options:\n1. Add book\n2. Edit book\n3. View books\n4. Exit\n5. Generate Users List\n";
+//void admin(node* &head) {
+//    cout << "\nadmin options:\n1. add book\n2. edit book\n3. view books\n4. exit\n5. generate users list\n";
 //    int option;
 //    cin >> option;
 //
 //    switch (option) {
 //    case 1: {
-//        cout << "Add Book selected.\n";
+//        cout << "add book selected.\n";
 //        break;
 //    }
 //    case 2: {
-//        cout << "Edit Book selected.\n";
+//        cout << "edit book selected.\n";
 //        break;
 //    }
 //    case 3: {
-//        cout << "View Books selected.\n";
+//        cout << "view books selected.\n";
 //        break;
 //    }
 //    case 4: {
-//        cout << "Exiting Admin Menu....\n";
+//        cout << "exiting admin menu....\n";
 //        break;
 //    }
 //    case 5: {
-//        cout << "Generating List of User....\n";
-//        GenStudList(head);
+//        cout << "generating list of user....\n";
+//        genstudlist(head);
 //        break;
 //    }
 //    default:
-//        cout << "Invalid option. Returning to main menu.\n";
+//        cout << "invalid option. returning to main menu.\n";
 //        return;
 //    }
 //}
 //
-////Hasan
+////hasan
 //
-// void DepositMoney(Node* studentNode) {
-//    if (studentNode == nullptr) {
-//        cout << "Error: No student account found.\n";
+// void depositmoney(node* studentnode) {
+//    if (studentnode == nullptr) {
+//        cout << "error: no student account found.\n";
 //        return;
 //    }
 //
-//    cout << "Your current balance is: $" << studentNode->balance << endl;
+//    cout << "your current balance is: $" << studentnode->balance << endl;
 //
-//    int depositAmount;
-//    cout << "Enter the amount you wish to deposit: ";
-//    cin >> depositAmount;
+//    int depositamount;
+//    cout << "enter the amount you wish to deposit: ";
+//    cin >> depositamount;
 //
-//    if (depositAmount > 0) {
-//        studentNode->balance += depositAmount;
-//        cout << "Deposit successful. Your new balance is: $" << studentNode->balance << endl;
+//    if (depositamount > 0) {
+//        studentnode->balance += depositamount;
+//        cout << "deposit successful. your new balance is: $" << studentnode->balance << endl;
 //    }
 //    else {
-//        cout << "Invalid deposit amount. Try again.\n";
+//        cout << "invalid deposit amount. try again.\n";
 //    }
 //}
 //
 //
 //
 //int main() {
-//    Node* head = new Node("Admin");
-//    Node* tail = head;
-//    AdminAccount(head, tail);
+//    node* head = new node("admin");
+//    node* tail = head;
+//    adminaccount(head, tail);
 //
-//    RegisterStudent(head, tail);
+//    registerstudent(head, tail);
 //
 //
 //
