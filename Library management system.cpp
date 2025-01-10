@@ -69,6 +69,7 @@ void student(node*& studentnode, node*& tail);
 void borrowBooks(node*& studentnode);
 void returnBooks(node*& studentnode);
 void viewBorrowedBooks(node*& studentnode);
+void initializeBooks();
 
 // Function definitions
 
@@ -369,43 +370,44 @@ void depositmoney(node*& studentnode, node*& tail) {
 
 
 // Borrow books
-void borrowBooks(node*& studentnode) {
-    if (studentnode == nullptr) {
-        cout << "Error: No student account found.\n";
-        return;
-    }
-
-    string bookname;
-    cout << "Book is $20 each\n";
-    cout << "Enter the name of the book you want to borrow: ";
-    cin >> bookname;
-
-    // Check if the student has already borrowed the book
-    booknode* temp = bookhead;
-    while (temp != nullptr) {
-        if (temp->username == studentnode->username && temp->bookname == bookname) {
-            cout << "You have already borrowed this book.\n";
-            return;
-        }
-        temp = temp->next;
-    }
-
-    // Create a new booknode for the borrowed book
-    booknode* newBook = new booknode(studentnode->username, bookname);
-
-    // Add the new booknode to the book list
-    if (bookhead == nullptr) {
-        bookhead = newBook;
-        booktail = newBook;
-    }
-    else {
-        booktail->next = newBook;
-        newBook->prev = booktail;
-        booktail = newBook;
-    }
-    studentnode->balance -= 20;
-    cout << "Book '" << bookname << "' borrowed successfully!\nyour new balance is: "<<studentnode->balance<<endl;
-}
+//void borrowBooks(node*& studentnode) {
+//    if (studentnode == nullptr) {
+//        cout << "Error: No student account found.\n";
+//        return;
+//    }
+//    
+//
+//    string bookname;
+//    cout << "Book is $20 each\n";
+//    cout << "Enter the name of the book you want to borrow: ";
+//    cin >> bookname;
+//
+//    // Check if the student has already borrowed the book
+//    booknode* temp = bookhead;
+//    while (temp != nullptr) {
+//        if (temp->username == studentnode->username && temp->bookname == bookname) {
+//            cout << "You have already borrowed this book.\n";
+//            return;
+//        }
+//        temp = temp->next;
+//    }
+//
+//    // Create a new booknode for the borrowed book
+//    booknode* newBook = new booknode(studentnode->username, bookname);
+//
+//    // Add the new booknode to the book list
+//    if (bookhead == nullptr) {
+//        bookhead = newBook;
+//        booktail = newBook;
+//    }
+//    else {
+//        booktail->next = newBook;
+//        newBook->prev = booktail;
+//        booktail = newBook;
+//    }
+//    studentnode->balance -= 20;
+//    cout << "Book '" << bookname << "' borrowed successfully!\nyour new balance is: "<<studentnode->balance<<endl;
+//}
 
 
 // Return books
@@ -476,13 +478,118 @@ void viewBorrowedBooks(node*& studentnode) {
 int main() {
     node* head = new node("admin", adminpass);
     node* tail = head;
-   
+	initializeBooks();
 
     registerstudent(head, tail);
 
     return 0;
 }
 
+void initializeBooks() {
+    // Add 5 books to the list with initial quantities
+    booknode* book1 = new booknode("Library", "Book A", 3);
+    booknode* book2 = new booknode("Library", "Book B", 2);
+    booknode* book3 = new booknode("Library", "Book C", 5);
+    booknode* book4 = new booknode("Library", "Book D", 4);
+    booknode* book5 = new booknode("Library", "Book E", 1);
+
+    // Link the books in a doubly linked list
+    book1->next = book2;
+    book2->prev = book1;
+    book2->next = book3;
+    book3->prev = book2;
+    book3->next = book4;
+    book4->prev = book3;
+    book4->next = book5;
+    book5->prev = book4;
+
+    // Set the head and tail of the book list
+    bookhead = book1;
+    booktail = book5;
+}
+
+void borrowBooks(node*& studentnode) {
+    if (studentnode == nullptr) {
+        cout << "Error: No student account found.\n";
+        return;
+    }
+
+    if (bookhead == nullptr) {
+        cout << "No books available to borrow.\n";
+        return;
+    }
+
+    // Print the list of available books with quantities
+    cout << "Available Books:\n";
+    booknode* temp = bookhead;
+    int index = 1;
+    while (temp != nullptr) {
+        cout << index << ". " << temp->bookname << " (Available: " << temp->quantity << ")\n";
+        temp = temp->next;
+        index++;
+    }
+
+    // Ask the user to choose a book by its number
+    int choice;
+    cout << "Enter the number of the book you want to borrow: ";
+    cin >> choice;
+
+    // Validate the user's choice and find the corresponding book
+    temp = bookhead;
+    index = 1;
+    string bookname;
+    while (temp != nullptr) {
+        if (index == choice) {
+            if (temp->quantity > 0) { // Check if the book is available
+                bookname = temp->bookname;
+            }
+            else {
+                cout << "Sorry, the selected book is out of stock.\n";
+                return;
+            }
+            break;
+        }
+        temp = temp->next;
+        index++;
+    }
+
+    if (bookname.empty()) { // If the user entered an invalid number
+        cout << "Invalid choice. Please try again.\n";
+        return;
+    }
+
+    // Check if the student has already borrowed this book
+    booknode* borrowedBook = bookhead;
+    while (borrowedBook != nullptr) {
+        if (borrowedBook->username == studentnode->username && borrowedBook->bookname == bookname) {
+            cout << "You have already borrowed this book.\n";
+            return;
+        }
+        borrowedBook = borrowedBook->next;
+    }
+
+    // Deduct one quantity of the book
+    temp->quantity--;
+
+    // Create a new booknode to track the borrowed book for the student
+    booknode* newBook = new booknode(studentnode->username, bookname);
+
+    // Add the new booknode to the student's borrowed list
+    if (bookhead == nullptr) {
+        bookhead = newBook;
+        booktail = newBook;
+    }
+    else {
+        booktail->next = newBook;
+        newBook->prev = booktail;
+        booktail = newBook;
+    }
+
+    // Deduct the book's cost from the student's balance
+    studentnode->balance -= 20;
+
+    cout << "Book '" << bookname << "' borrowed successfully!\nYour new balance is: " << studentnode->balance << endl;
+}
 
 
 
