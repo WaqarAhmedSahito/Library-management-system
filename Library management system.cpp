@@ -431,15 +431,13 @@ void depositmoney(node*& studentnode, node*& tail) {
 
 
 
-void initializeBooks(node* &head) {
-    int numBooks = 0;
-
-    cout << "Enter the number of books to add OR leave empty to Go back to Admin Panel: ";
-    cin >> numBooks;
-
+void initializeBooks(node*& head) {
     
 
-    booknode* temp = bookhead;
+
+    int numBooks = 0;
+    cout << "Enter the number of books to add OR leave empty to Go back to Admin Panel: ";
+    cin >> numBooks;
 
     for (int i = 0; i < numBooks; ++i) {
         string bookname;
@@ -448,12 +446,13 @@ void initializeBooks(node* &head) {
         cout << "Enter the name of book " << i + 1 << ": ";
         cin >> bookname;
 
-        while (bookhead != NULL) {
-            if(bookhead->bookname==bookname){
-                cout << "Book already exist! " << endl;
+        booknode* temp = bookhead;
+        while (temp != nullptr) {
+            if (temp->bookname == bookname) {
+                cout << "Book already exists! " << endl;
                 bookExist = true;
                 cout << "Press Enter to increase Quantity\nPress Esc to Cancel " << endl;
-                
+
                 char ch;
                 while (true) {
                     if (_kbhit()) {
@@ -462,39 +461,31 @@ void initializeBooks(node* &head) {
                     }
                 }
                 if (ch == 13) {
-                    cout << "Current Quantity: " << bookhead->quantity << " Enter Increment size: ";
+                    cout << "Current Quantity: " << temp->quantity << " Enter Increment size: ";
                     cin >> quantity;
-                    bookhead->quantity += quantity;
-                    cout << "New Quantity of Book " << bookhead->bookname << " is " << bookhead->quantity << endl;
+                    temp->quantity += quantity;
+                    cout << "New Quantity of Book " << temp->bookname << " is " << temp->quantity << endl;
                     break;
                 }
                 if (ch == 27) {
-                    
                     cout << "Moving to next Book..." << endl;
                     break;
                 }
             }
+            temp = temp->next;
         }
-        
 
         // Create a new book node
-        if(bookExist==false)
-        {
+        if (!bookExist) {
             cout << "Enter the quantity of book " << bookname << ": ";
             cin >> quantity;
 
             booknode* newBook = new booknode("Library", bookname, quantity);
 
             // Add the new book to the list
-            if (bookhead == nullptr) {
-                bookhead = newBook;
-                booktail = newBook;
-            }
-            else {
-                booktail->next = newBook;
-                newBook->prev = booktail;
-                booktail = newBook;
-            }
+            booktail->next = newBook;
+            newBook->prev = booktail;
+            booktail = newBook;
         }
     }
 
@@ -690,7 +681,17 @@ void viewBorrowedBooks(node*& studentnode, node*& tail) {
 int main() {
     node* head = new node("admin", adminpass);
     node* tail = head;
-    
+
+    booknode* book1 = new booknode("Library", "BookA", 3);
+    booknode* book2 = new booknode("Library", "BookB", 1);
+
+
+    book1->next = book2;
+    book2->prev = book1;
+
+    bookhead = book1;
+    booktail = book2;
+
 
     registerstudent(head, tail);
 
