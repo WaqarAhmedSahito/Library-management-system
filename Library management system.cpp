@@ -415,7 +415,6 @@ void depositmoney(node*& studentnode, node*& tail) {
     student(studentnode, tail);
 }
 
-
 void initializeBooks() {
     // Add 5 books to the list with initial quantities
     booknode* book1 = new booknode("Library", "BookA", 3);
@@ -437,7 +436,11 @@ void initializeBooks() {
     // Set the head and tail of the book list
     bookhead = book1;
     booktail = book5;
+
+   
+	
 }
+
 
 // Borrow books
 void borrowBooks(node*& studentnode ,node*& tail) {
@@ -479,8 +482,11 @@ void borrowBooks(node*& studentnode ,node*& tail) {
     // Check if the book is available
     if (temp->quantity <= 0) {
         cout << "Book '" << temp->bookname << "' is out of stock.\n";
-        return;
+  
+        return ;
+
     }
+    
 
     // Check if the student has already borrowed the book
     booknode* tempB = bookhead;
@@ -491,6 +497,7 @@ void borrowBooks(node*& studentnode ,node*& tail) {
         }
         tempB = tempB->next;
     }
+
 
     // Decrement the book quantity
     temp->quantity--;
