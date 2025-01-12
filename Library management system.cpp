@@ -69,56 +69,45 @@ void student(node*& studentnode, node*& tail);
 void borrowBooks(node*& studentnode, node*& tail);
 void returnBooks(node*& studentnode, node*& tail);
 void viewBorrowedBooks(node*& studentnode, node*& tail);
-void initializeBooks();
+void initializeBooks(node* &head);
+void deleteBook(booknode*& head, string k);
 
 // Function definitions
 
-
-
-
+// Delete a book from the book list
 void deleteBook(booknode*& head, string k) {
-    // If the list is empty, return
-    if (head == NULL) {
+    if (head == nullptr) {
         cout << "List is empty. Nothing to delete." << endl;
         return;
     }
 
-    // Start from the head of the list
     booknode* temp = head;
-
-    // Traverse the list to find the node with the matching bookname
-    while (temp != NULL && temp->bookname != k) {
+    while (temp != nullptr && temp->bookname != k) {
         temp = temp->next;
     }
 
-    // If the node was not found, return
-    if (temp == NULL) {
+    if (temp == nullptr) {
         cout << "Book with name '" << k << "' not found." << endl;
         return;
     }
 
-
     if (temp == head) {
-        head = head->next; 
-        if (head != NULL) {
-            head->prev = NULL;
+        head = head->next;
+        if (head != nullptr) {
+            head->prev = nullptr;
         }
-        delete temp;
-        cout << "Book '" << k << "' deleted." << endl;
-        return;
     }
-
-
-    if (temp->prev != NULL) {
-        temp->prev->next = temp->next; 
+    else {
+        if (temp->prev != nullptr) {
+            temp->prev->next = temp->next;
+        }
+        if (temp->next != nullptr) {
+            temp->next->prev = temp->prev;
+        }
     }
-    if (temp->next != NULL) {
-        temp->next->prev = temp->prev; 
-    }
-    delete temp; 
+    delete temp;
     cout << "Book '" << k << "' deleted." << endl;
 }
-
 
 // Insert a new user at the end of the user list
 void insertend(node*& tail, string username, string password) {
@@ -362,11 +351,13 @@ void loginstudentupdated(node*& head, node*& tail) {
 void admin(node*& head) {
     cout << "\nAdmin Options:\n1. Add Book\n2. Edit Book\n3. View Books\n4. Generate Users List\n5. Exit\n";
     int option;
+    cout << "Enter Choice: ";
     cin >> option;
 
     switch (option) {
     case 1: {
         cout << "Add book selected.\n";
+        initializeBooks(head);
         break;
     }
     case 2: {
@@ -415,35 +406,105 @@ void depositmoney(node*& studentnode, node*& tail) {
     student(studentnode, tail);
 }
 
-void initializeBooks() {
-    // Add 5 books to the list with initial quantities
-    booknode* book1 = new booknode("Library", "BookA", 3);
-    booknode* book2 = new booknode("Library", "BookB", 2);
-    booknode* book3 = new booknode("Library", "BookC", 5);
-    booknode* book4 = new booknode("Library", "BookD", 4);
-    booknode* book5 = new booknode("Library", "BookE", 1);
+//void initializeBooks() {
+//    // Add 5 books to the list with initial quantities
+//    booknode* book1 = new booknode("Library", "BookA", 3);
+//    booknode* book2 = new booknode("Library", "BookB", 2);
+//    booknode* book3 = new booknode("Library", "BookC", 5);
+//    booknode* book4 = new booknode("Library", "BookD", 4);
+//    booknode* book5 = new booknode("Library", "BookE", 1);
+//
+//    // Link the books in a doubly linked list
+//    book1->next = book2;
+//    book2->prev = book1;
+//    book2->next = book3;
+//    book3->prev = book2;
+//    book3->next = book4;
+//    book4->prev = book3;
+//    book4->next = book5;
+//    book5->prev = book4;
+//
+//    // Set the head and tail of the book list
+//    bookhead = book1;
+//    booktail = book5;
+//}
 
-    // Link the books in a doubly linked list
-    book1->next = book2;
-    book2->prev = book1;
-    book2->next = book3;
-    book3->prev = book2;
-    book3->next = book4;
-    book4->prev = book3;
-    book4->next = book5;
-    book5->prev = book4;
 
-    // Set the head and tail of the book list
-    bookhead = book1;
-    booktail = book5;
 
-   
-	
+void initializeBooks(node* &head) {
+    int numBooks = 0;
+
+    cout << "Enter the number of books to add OR leave empty to Go back to Admin Panel: ";
+    cin >> numBooks;
+
+    
+
+    booknode* temp = bookhead;
+
+    for (int i = 0; i < numBooks; ++i) {
+        string bookname;
+        int quantity;
+        bool bookExist = false;
+        cout << "Enter the name of book " << i + 1 << ": ";
+        cin >> bookname;
+
+        while (bookhead != NULL) {
+            if(bookhead->bookname==bookname){
+                cout << "Book already exist! " << endl;
+                bookExist = true;
+                cout << "Press Enter to increase Quantity\nPress Esc to Cancel " << endl;
+                
+                char ch;
+                while (true) {
+                    if (_kbhit()) {
+                        ch = _getch();
+                        break;
+                    }
+                }
+                if (ch == 13) {
+                    cout << "Current Quantity: " << bookhead->quantity << " Enter Increment size: ";
+                    cin >> quantity;
+                    bookhead->quantity += quantity;
+                    cout << "New Quantity of Book " << bookhead->bookname << " is " << bookhead->quantity << endl;
+                    break;
+                }
+                if (ch == 27) {
+                    
+                    cout << "Moving to next Book..." << endl;
+                    break;
+                }
+            }
+        }
+        
+
+        // Create a new book node
+        if(bookExist==false)
+        {
+            cout << "Enter the quantity of book " << bookname << ": ";
+            cin >> quantity;
+
+            booknode* newBook = new booknode("Library", bookname, quantity);
+
+            // Add the new book to the list
+            if (bookhead == nullptr) {
+                bookhead = newBook;
+                booktail = newBook;
+            }
+            else {
+                booktail->next = newBook;
+                newBook->prev = booktail;
+                booktail = newBook;
+            }
+        }
+    }
+
+    cout << "Books initialized successfully!\n";
 }
 
 
-// Borrow books
-void borrowBooks(node*& studentnode ,node*& tail) {
+
+
+void borrowBooks(node*& studentnode, node*& tail) {
     if (studentnode == nullptr) {
         cout << "Error: No student account found.\n";
         return;
@@ -453,7 +514,9 @@ void borrowBooks(node*& studentnode ,node*& tail) {
     booknode* temp = bookhead;
     int index = 1;
     while (temp != nullptr) {
-        cout << index << ". " << temp->bookname << " (Available: " << temp->quantity << ")\n";
+        if (temp->username == "Library") {
+            cout << index << ". " << temp->bookname << " (Available: " << temp->quantity << ")\n";
+        }
         temp = temp->next;
         index++;
     }
@@ -519,12 +582,35 @@ void borrowBooks(node*& studentnode ,node*& tail) {
     // Deduct the cost from the student's balance
     studentnode->balance -= 20;
     cout << "Book '" << temp->bookname << "' borrowed successfully!\nYour new balance is: " << studentnode->balance << endl;
-    student(studentnode, tail);
+    
+    cout << "Press Esc to go back to Main Menu OR Press Enter to Desposit amount." << endl;
 
+    char ch ;
+
+    while (true) {
+        if (_kbhit()) {
+            ch = _getch();
+            break;
+        }
+    }
+   
+       
+    if(ch==13)
+    {
+
+       borrowBooks(studentnode, tail);
+    }
+    else if (ch == 27) {
+        cout << endl;
+       cout << "Back to Main Menu Selected" << endl;
+       student(studentnode, tail);
+    }
+    
 
 
 }
-// Return books
+
+
 void returnBooks(node*& studentnode, node*& tail) {
     if (studentnode == nullptr) {
         cout << "Error: No student account found.\n";
@@ -539,7 +625,17 @@ void returnBooks(node*& studentnode, node*& tail) {
     booknode* temp = bookhead;
     while (temp != nullptr) {
         if (temp->username == studentnode->username && temp->bookname == bookname) {
-           
+            // Increment the quantity of the returned book
+            booknode* libraryBook = bookhead;
+            while (libraryBook != nullptr) {
+                if (libraryBook->bookname == bookname && libraryBook->username == "Library") {
+                    libraryBook->quantity++;
+                    break;
+                }
+                libraryBook = libraryBook->next;
+            }
+
+            // Remove the borrowed book from the list
             if (temp->prev != nullptr) {
                 temp->prev->next = temp->next;
             }
@@ -562,12 +658,11 @@ void returnBooks(node*& studentnode, node*& tail) {
     }
 
     cout << "You have not borrowed this book.\n";
-    student(studentnode,tail);
-
+    student(studentnode, tail);
 }
 
-// View borrowed books
-void viewBorrowedBooks(node*& studentnode ,node*& tail) {
+
+void viewBorrowedBooks(node*& studentnode, node*& tail) {
     if (studentnode == nullptr) {
         cout << "Error: No student account found.\n";
         return;
@@ -589,114 +684,17 @@ void viewBorrowedBooks(node*& studentnode ,node*& tail) {
         cout << "No books borrowed.\n";
     }
     student(studentnode, tail);
-
 }
-
-
-
 
 // Main function
 int main() {
     node* head = new node("admin", adminpass);
     node* tail = head;
-    initializeBooks();
+    
 
     registerstudent(head, tail);
 
     return 0;
 }
-
-
-//
-//void borrowBooks(node*& studentnode) {
-//    if (studentnode == nullptr) {
-//        cout << "Error: No student account found.\n";
-//        return;
-//    }
-//
-//    if (bookhead == nullptr) {
-//        cout << "No books available to borrow.\n";
-//        return;
-//    }
-//
-//    // Print the list of available books with quantities
-//    cout << "Available Books:\n";
-//    booknode* temp = bookhead;
-//    int index = 1;
-//    while (temp != nullptr) {
-//        cout << index << ". " << temp->bookname << " (Available: " << temp->quantity << ")\n";
-//        temp = temp->next;
-//        index++;
-//    }
-//
-//    // Ask the user to choose a book by its number
-//    int choice;
-//    cout << "Enter the number of the book you want to borrow: ";
-//    cin >> choice;
-//
-//    // Validate the user's choice and find the corresponding book
-//    temp = bookhead;
-//    index = 1;
-//    string bookname;
-//
-//
-//    while (temp != nullptr) {
-//        if (index == choice) {
-//            if (temp->quantity > 0) { // Check if the book is available
-//                bookname = temp->bookname;
-//            }
-//            else {
-//                cout << "Sorry, the selected book is out of stock.\n";
-//                return;
-//            }
-//            break;
-//        }
-//        temp = temp->next;
-//        index++;
-//    }
-//
-//    if (bookname.empty()) { // If the user entered an invalid number
-//        cout << "Invalid choice. Please try again.\n";
-//        return;
-//    }
-//
-//    // Check if the student has already borrowed this book
-//    booknode* borrowedBook = bookhead;
-//    while (borrowedBook != nullptr) {
-//        if (borrowedBook->username == studentnode->username && borrowedBook->bookname == bookname) {
-//            cout << "You have already borrowed this book.\n";
-//            return;
-//        }
-//        borrowedBook = borrowedBook->next;
-//    }
-//
-//    // Deduct one quantity of the book
-//    /*temp->quantity--;*/
-//
-//    if (temp->quantity == 1) {
-//        deleteBook(temp,temp->bookname);
-//        
-//    }
-//
-//    // Create a new booknode to track the borrowed book for the student
-//    booknode* newBook = new booknode(studentnode->username, bookname);
-//
-//    // Add the new booknode to the student's borrowed list
-//    if (bookhead == nullptr) {
-//        bookhead = newBook;
-//        booktail = newBook;
-//    }
-//    else {
-//        booktail->next = newBook;
-//        newBook->prev = booktail;
-//        booktail = newBook;
-//    }
-//
-//    // Deduct the book's cost from the student's balance
-//    studentnode->balance -= 20;
-//
-//    cout << "Book '" << bookname << "' borrowed successfully!\nYour new balance is: " << studentnode->balance << endl;
-//}
-
 
 
