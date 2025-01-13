@@ -2,6 +2,7 @@
 #include <string>
 #include <cstdlib>
 #include <conio.h>
+#include <limits>
 
 using namespace std;
 
@@ -69,10 +70,55 @@ void student(node*& studentnode, node*& tail);
 void borrowBooks(node*& studentnode, node*& tail);
 void returnBooks(node*& studentnode, node*& tail);
 void viewBorrowedBooks(node*& studentnode, node*& tail);
-void initializeBooks(node* &head);
+void initializeBooks(node*& head);
 void deleteBook(booknode*& head, string k);
 
-// Function definitions
+// Utility functions for input validation
+int getMenuChoice(int minChoice, int maxChoice) {
+    int choice;
+    while (true) {
+        cout << "Enter choice: ";
+        cin >> choice;
+        if (cin.fail() || choice < minChoice || choice > maxChoice) {
+            cin.clear(); // Clear the error flag
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Discard invalid input
+            cout << "Invalid choice. Please enter a number between " << minChoice << " and " << maxChoice << ".\n";
+        }
+        else {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Discard any extra input
+            return choice;
+        }
+    }
+}
+
+string getNonEmptyString(const string& prompt) {
+    string input;
+    while (true) {
+        cout << prompt;
+        getline(cin, input);
+        if (!input.empty()) {
+            return input;
+        }
+        cout << "Input cannot be empty. Please try again.\n";
+    }
+}
+
+int getPositiveNumber(const string& prompt) {
+    int number;
+    while (true) {
+        cout << prompt;
+        cin >> number;
+        if (cin.fail() || number <= 0) {
+            cin.clear(); // Clear the error flag
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Discard invalid input
+            cout << "Invalid input. Please enter a positive number.\n";
+        }
+        else {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Discard any extra input
+            return number;
+        }
+    }
+}
 
 // Delete a book from the book list
 void deleteBook(booknode*& head, string k) {
@@ -165,9 +211,7 @@ void registerstudent(node*& head, node*& tail) {
     int cont = 0;
     while (cont == 0) {
         cout << "1) Register Account\n2) Login Existing Account\n3) Login as Admin\n4) Exit\n";
-        cout << "Enter choice: ";
-        int loginchoice;
-        cin >> loginchoice;
+        int loginchoice = getMenuChoice(1, 4);
 
         switch (loginchoice) {
         case 1: {
@@ -176,9 +220,7 @@ void registerstudent(node*& head, node*& tail) {
             int maxattempts = 5;
 
             while (attempts < maxattempts) {
-                studname = "";
-                cout << "Assign username: ";
-                cin >> studname;
+                studname = getNonEmptyString("Assign username: ");
 
                 node* temp = head;
                 while (temp != nullptr) {
@@ -214,8 +256,7 @@ void registerstudent(node*& head, node*& tail) {
                     }
                 }
                 else {
-                    cout << "Assign password: ";
-                    cin >> studentpassword;
+                    studentpassword = getNonEmptyString("Assign password: ");
 
                     genidnum();
                     insertend(tail, studname, studentpassword);
@@ -254,11 +295,8 @@ void registerstudent(node*& head, node*& tail) {
 
 // Admin login
 void login_admin(node*& head) {
-    string username, password;
-    cout << "Enter admin username: ";
-    cin >> username;
-    cout << "Enter admin password: ";
-    cin >> password;
+    string username = getNonEmptyString("Enter admin username: ");
+    string password = getNonEmptyString("Enter admin password: ");
 
     if (username == "admin" && password == adminpass) {
         cout << "Admin logged in successfully.\n";
@@ -272,8 +310,7 @@ void login_admin(node*& head) {
 // Student menu
 void student(node*& studentnode, node*& tail) {
     cout << "\nStudent Options:\n1. View Books\n2. Borrow Book\n3. Return Book\n4. Deposit Money\n5. Logout User\n6. Exit\n";
-    int option;
-    cin >> option;
+    int option = getMenuChoice(1, 6);
 
     switch (option) {
     case 1: {
@@ -310,11 +347,7 @@ void student(node*& studentnode, node*& tail) {
 
 // Student login
 void loginstudentupdated(node*& head, node*& tail) {
-    string inputpass;
-    string inputid;
-
-    cout << "Enter username: ";
-    cin >> inputid;
+    string inputid = getNonEmptyString("Enter username: ");
 
     node* temp = head;
     while (temp != nullptr) {
@@ -323,8 +356,7 @@ void loginstudentupdated(node*& head, node*& tail) {
             const int maxattempts = 3;
 
             while (trycnt < maxattempts) {
-                cout << "Enter password: ";
-                cin >> inputpass;
+                string inputpass = getNonEmptyString("Enter password: ");
 
                 if (inputpass == temp->password) {
                     cout << "Welcome " << inputid << ", you are now logged in as a student.\n";
@@ -350,9 +382,7 @@ void loginstudentupdated(node*& head, node*& tail) {
 // Admin menu
 void admin(node*& head) {
     cout << "\nAdmin Options:\n1. Add Book\n2. Edit Book\n3. View Books\n4. Generate Users List\n5. Exit\n";
-    int option;
-    cout << "Enter Choice: ";
-    cin >> option;
+    int option = getMenuChoice(1, 5);
 
     switch (option) {
     case 1: {
@@ -392,97 +422,29 @@ void depositmoney(node*& studentnode, node*& tail) {
 
     cout << "Your current balance is: $" << studentnode->balance << endl;
 
-    int depositamount;
-    cout << "Enter the amount you wish to deposit: ";
-    cin >> depositamount;
+    int depositamount = getPositiveNumber("Enter the amount you wish to deposit: ");
 
-    if (depositamount > 0) {
-        studentnode->balance += depositamount;
-        cout << "Deposit successful. Your new balance is: $" << studentnode->balance << endl;
-    }
-    else {
-        cout << "Invalid deposit amount. Try again.\n";
-    }
+    studentnode->balance += depositamount;
+    cout << "Deposit successful. Your new balance is: $" << studentnode->balance << endl;
+
     student(studentnode, tail);
 }
 
-//void initializeBooks() {
-//    // Add 5 books to the list with initial quantities
-//    booknode* book1 = new booknode("Library", "BookA", 3);
-//    booknode* book2 = new booknode("Library", "BookB", 2);
-//    booknode* book3 = new booknode("Library", "BookC", 5);
-//    booknode* book4 = new booknode("Library", "BookD", 4);
-//    booknode* book5 = new booknode("Library", "BookE", 1);
-//
-//    // Link the books in a doubly linked list
-//    book1->next = book2;
-//    book2->prev = book1;
-//    book2->next = book3;
-//    book3->prev = book2;
-//    book3->next = book4;
-//    book4->prev = book3;
-//    book4->next = book5;
-//    book5->prev = book4;
-//
-//    // Set the head and tail of the book list
-//    bookhead = book1;
-//    booktail = book5;
-//}
-
-
-
+// Initialize books
 void initializeBooks(node*& head) {
-    
-
-
-    int numBooks = 0;
-    cout << "Enter the number of books to add OR leave empty to Go back to Admin Panel: ";
-    cin >> numBooks;
+    int numBooks = getPositiveNumber("Enter the number of books to add: ");
 
     for (int i = 0; i < numBooks; ++i) {
-        string bookname;
-        int quantity;
-        bool bookExist = false;
-        cout << "Enter the name of book " << i + 1 << ": ";
-        cin >> bookname;
+        string bookname = getNonEmptyString("Enter the name of book " + to_string(i + 1) + ": ");
+        int quantity = getPositiveNumber("Enter the quantity of book " + bookname + ": ");
 
-        booknode* temp = bookhead;
-        while (temp != nullptr) {
-            if (temp->bookname == bookname) {
-                cout << "Book already exists! " << endl;
-                bookExist = true;
-                cout << "Press Enter to increase Quantity\nPress Esc to Cancel " << endl;
+        booknode* newBook = new booknode("Library", bookname, quantity);
 
-                char ch;
-                while (true) {
-                    if (_kbhit()) {
-                        ch = _getch();
-                        break;
-                    }
-                }
-                if (ch == 13) {
-                    cout << "Current Quantity: " << temp->quantity << " Enter Increment size: ";
-                    cin >> quantity;
-                    temp->quantity += quantity;
-                    cout << "New Quantity of Book " << temp->bookname << " is " << temp->quantity << endl;
-                    break;
-                }
-                if (ch == 27) {
-                    cout << "Moving to next Book..." << endl;
-                    break;
-                }
-            }
-            temp = temp->next;
+        if (bookhead == nullptr) {
+            bookhead = newBook;
+            booktail = newBook;
         }
-
-        // Create a new book node
-        if (!bookExist) {
-            cout << "Enter the quantity of book " << bookname << ": ";
-            cin >> quantity;
-
-            booknode* newBook = new booknode("Library", bookname, quantity);
-
-            // Add the new book to the list
+        else {
             booktail->next = newBook;
             newBook->prev = booktail;
             booktail = newBook;
@@ -492,9 +454,7 @@ void initializeBooks(node*& head) {
     cout << "Books initialized successfully!\n";
 }
 
-
-
-
+// Borrow books
 void borrowBooks(node*& studentnode, node*& tail) {
     if (studentnode == nullptr) {
         cout << "Error: No student account found.\n";
@@ -512,10 +472,7 @@ void borrowBooks(node*& studentnode, node*& tail) {
         index++;
     }
 
-    int bookIndex;
-    cout << "Book is $20 each\n";
-    cout << "Enter the index of the book you want to borrow: ";
-    cin >> bookIndex;
+    int bookIndex = getPositiveNumber("Enter the index of the book you want to borrow: ");
 
     // Validate the input index
     if (bookIndex < 1 || bookIndex >= index) {
@@ -536,11 +493,8 @@ void borrowBooks(node*& studentnode, node*& tail) {
     // Check if the book is available
     if (temp->quantity <= 0) {
         cout << "Book '" << temp->bookname << "' is out of stock.\n";
-  
-        return ;
-
+        return;
     }
-    
 
     // Check if the student has already borrowed the book
     booknode* tempB = bookhead;
@@ -552,7 +506,6 @@ void borrowBooks(node*& studentnode, node*& tail) {
         tempB = tempB->next;
     }
 
-
     // Decrement the book quantity
     temp->quantity--;
 
@@ -560,57 +513,69 @@ void borrowBooks(node*& studentnode, node*& tail) {
     booknode* newBook = new booknode(studentnode->username, temp->bookname);
 
     // Add the new booknode to the book list
-    if (bookhead == nullptr) {
-        bookhead = newBook;
-        booktail = newBook;
+    if (studentnode->balance >= 20) {
+        if (bookhead == nullptr) {
+            bookhead = newBook;
+            booktail = newBook;
+        }
+        else {
+            booktail->next = newBook;
+            newBook->prev = booktail;
+            booktail = newBook;
+        }
+        studentnode->balance -= 20;
+        cout << "Book '" << temp->bookname << "' borrowed successfully!\nYour new balance is: " << studentnode->balance << endl;
     }
     else {
-        booktail->next = newBook;
-        newBook->prev = booktail;
-        booktail = newBook;
+        cout << "Insufficient Balance!\n";
     }
 
     // Deduct the cost from the student's balance
-    studentnode->balance -= 20;
-    cout << "Book '" << temp->bookname << "' borrowed successfully!\nYour new balance is: " << studentnode->balance << endl;
-    
-    cout << "Press Esc to go back to Main Menu OR Press Enter to Desposit amount." << endl;
+    cout << "Press Esc to go back to Main Menu OR Press Enter to Borrow Another Book.\n";
 
-    char ch ;
-
+    char ch;
     while (true) {
         if (_kbhit()) {
             ch = _getch();
             break;
         }
     }
-   
-       
-    if(ch==13)
-    {
 
-       borrowBooks(studentnode, tail);
+    if (ch == 13) {
+        borrowBooks(studentnode, tail);
     }
     else if (ch == 27) {
         cout << endl;
-       cout << "Back to Main Menu Selected" << endl;
-       student(studentnode, tail);
+        cout << "Back to Main Menu Selected\n";
+        student(studentnode, tail);
     }
-    
-
-
 }
 
-
+// Return books
 void returnBooks(node*& studentnode, node*& tail) {
     if (studentnode == nullptr) {
         cout << "Error: No student account found.\n";
         return;
     }
 
-    string bookname;
-    cout << "Enter the name of the book you want to return: ";
-    cin >> bookname;
+    cout << "Books borrowed by " << studentnode->username << ":\n";
+    booknode* temp1 = bookhead;
+    bool hasBooks = false;
+
+    while (temp1 != nullptr) {
+        if (temp1->username == studentnode->username) {
+            cout << "- " << temp1->bookname << endl;
+            hasBooks = true;
+        }
+        temp1 = temp1->next;
+    }
+
+    if (!hasBooks) {
+        cout << "No books borrowed.\n";
+        return;
+    }
+
+    string bookname = getNonEmptyString("Enter the name of the book you want to return: ");
 
     // Search for the book in the book list
     booknode* temp = bookhead;
@@ -652,7 +617,7 @@ void returnBooks(node*& studentnode, node*& tail) {
     student(studentnode, tail);
 }
 
-
+// View borrowed books
 void viewBorrowedBooks(node*& studentnode, node*& tail) {
     if (studentnode == nullptr) {
         cout << "Error: No student account found.\n";
@@ -674,7 +639,17 @@ void viewBorrowedBooks(node*& studentnode, node*& tail) {
     if (!hasBooks) {
         cout << "No books borrowed.\n";
     }
-    student(studentnode, tail);
+    cout << "Press Esc for Main Menu\n";
+    char ch;
+    while (true) {
+        if (_kbhit()) {
+            ch = _getch();
+            break;
+        }
+    }
+    if (ch == 27) {
+        student(studentnode, tail);
+    }
 }
 
 // Main function
@@ -685,17 +660,13 @@ int main() {
     booknode* book1 = new booknode("Library", "BookA", 3);
     booknode* book2 = new booknode("Library", "BookB", 1);
 
-
     book1->next = book2;
     book2->prev = book1;
 
     bookhead = book1;
     booktail = book2;
 
-
     registerstudent(head, tail);
 
     return 0;
 }
-
-
