@@ -650,7 +650,7 @@ void returnBooks(node*& studentnode, node*& tail) {
         cout << "Enter the name of the book you want to return (or press Esc to exit): ";
         string bookname;
 
-        // Read input character by character to detect Esc key
+        //read input as chars and storing them in a string variable
         char ch;
         while ((ch = _getch()) != '\r') { // '\r' is the Enter key
             if (ch == 27) { // Esc key pressed
@@ -658,7 +658,7 @@ void returnBooks(node*& studentnode, node*& tail) {
                 student(studentnode,tail);
             }
             else if (ch == '\b') { // Backspace key pressed
-                if (!bookname.empty()) {
+                if (!bookname.empty()) {//goes back removing chars until bookname is empty
                     bookname.pop_back();
                     cout << "\b \b"; // Move cursor back and erase the character
                 }
