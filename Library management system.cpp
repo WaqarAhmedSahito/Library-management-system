@@ -72,6 +72,7 @@ void returnBooks(node*& studentnode, node*& tail);
 void viewBorrowedBooks(node*& studentnode, node*& tail);
 void initializeBooks(node*& head);
 void deleteBook(booknode*& head, string k);
+void deleteUser(node*& head, node*& tail);
 
 // Utility functions for input validation
 int getMenuChoice(int minChoice, int maxChoice) {
@@ -190,11 +191,70 @@ void traverse(node*& head) {
 
     while (temp != nullptr) {
         cout << endl;
-        cout << "Username: " << temp->username<<", Password: "<<temp->password << ", Balance: " << temp->balance << endl;
+        cout << "Username: " << temp->username << ", Password: " << temp->password << ", Balance: " << temp->balance << endl;
         temp = temp->next;
     }
     admin(head);
     cout << endl;
+}
+
+void traverseBooks(node*& bhead) {
+    cout << endl;
+    cout << "Available Books:\n";
+    cout << endl;
+
+    booknode* temp = bookhead;
+    int index = 1;
+    while (temp != nullptr) {
+        if (temp->username == "Library") {
+            cout << index << ". " << temp->bookname << " (Available: " << temp->quantity << ")\n";
+        }
+        temp = temp->next;
+        index++;
+    };
+    admin(bhead);
+}
+
+// Delete a user from the user list
+void deleteUser(node*& head, node*& tail) {
+    if (head == nullptr) {
+        cout << "List is empty. Nothing to delete." << endl;
+        return;
+    }
+
+    string username = getNonEmptyString("Enter the username of the user to delete: ");
+
+    node* temp = head;
+    while (temp != nullptr && temp->username != username) {
+        temp = temp->next;
+    }
+
+    if (temp == nullptr) {
+        cout << "User with username '" << username << "' not found." << endl;
+        return;
+    }
+
+    if (temp == head) {
+        head = head->next;
+        if (head != nullptr) {
+            head->prev = nullptr;
+        }
+    }
+    else {
+        if (temp->prev != nullptr) {
+            temp->prev->next = temp->next;
+        }
+        if (temp->next != nullptr) {
+            temp->next->prev = temp->prev;
+        }
+    }
+
+    if (temp == tail) {
+        tail = temp->prev;
+    }
+
+    delete temp;
+    cout << "User '" << username << "' deleted." << endl;
 }
 
 // Search for a user in the user list
@@ -231,9 +291,9 @@ void adminaccount(node*& head, node*& tail) {
 
 // Register or login as a student
 void registerstudent(node*& head, node*& tail) {
-    char ch ;
-    bool cont =true;
-    while (cont ==true) {
+    char ch;
+    bool cont = true;
+    while (cont == true) {
         cout << "1) Register Account\n2) Login Existing Account\n3) Login as Admin\n4) Exit\n";
         int loginchoice = getMenuChoice(1, 4);
 
@@ -324,7 +384,7 @@ void registerstudent(node*& head, node*& tail) {
         }
         if (ch == 13) {
             loginstudentupdated(head, tail);
-            
+
         }
         else if (ch == 27) {
             registerstudent(head, tail);
@@ -394,8 +454,6 @@ void student(node*& studentnode, node*& tail) {
 }
 
 // Student login
-
-
 void loginstudentupdated(node*& head, node*& tail) {
     cout << endl;
 
@@ -435,7 +493,7 @@ void loginstudentupdated(node*& head, node*& tail) {
 void admin(node*& head) {
     cout << endl;
 
-    cout << "\nAdmin Options:\n1. Add Book\n2. Edit Book\n3. View Books\n4. Generate Users List\n5. Exit\n";
+    cout << "\nAdmin Options:\n1. Add Book\n2. View Books\n3. Generate Users List\n4. Delete User\n5. Exit\n";
     int option = getMenuChoice(1, 5);
 
     switch (option) {
@@ -445,16 +503,18 @@ void admin(node*& head) {
         break;
     }
     case 2: {
-        cout << "Edit book selected.\n";
+        cout << "View books selected.\n";
+        traverseBooks(head);
         break;
     }
     case 3: {
-        cout << "View books selected.\n";
+        cout << "Generating list of users...\n";
+        traverse(head);
         break;
     }
     case 4: {
-        cout << "Generating list of users...\n";
-        traverse(head);
+        cout << "Delete user selected.\n";
+        deleteUser(head, head); // Pass head and tail to deleteUser
         break;
     }
     case 5: {
@@ -535,7 +595,7 @@ void borrowBooks(node*& studentnode, node*& tail) {
     // Validate the input index
     if (bookIndex < 1 || bookIndex >= index) {
         cout << "Invalid book index.\n";
-        return;
+        student(studentnode, tail);
     }
 
     // Find the book at the given index
@@ -543,7 +603,7 @@ void borrowBooks(node*& studentnode, node*& tail) {
     for (int i = 1; i < bookIndex; ++i) {
         if (temp == nullptr) {
             cout << "Invalid book index.\n";
-            return;
+            student(studentnode, tail);
         }
         temp = temp->next;
     }
@@ -559,7 +619,7 @@ void borrowBooks(node*& studentnode, node*& tail) {
     while (tempB != nullptr) {
         if (tempB->bookname == temp->bookname && tempB->username == studentnode->username) {
             cout << "You have already borrowed this book.\n";
-            return;
+            student(studentnode, tail);
         }
         tempB = tempB->next;
     }
@@ -610,17 +670,6 @@ void borrowBooks(node*& studentnode, node*& tail) {
 }
 
 // Return books
-#include <iostream>
-#include <string>
-#include <conio.h> // For _kbhit() and _getch() (Windows-specific)
-
-using namespace std;
-
-// Function to check if the Esc key is pressed
-bool isEscPressed() {
-    return _kbhit() && _getch() == 27; 
-}
-
 void returnBooks(node*& studentnode, node*& tail) {
     if (studentnode == nullptr) {
         cout << "Error: No student account found.\n";
@@ -650,15 +699,15 @@ void returnBooks(node*& studentnode, node*& tail) {
         cout << "Enter the name of the book you want to return (or press Esc to exit): ";
         string bookname;
 
-        //read input as chars and storing them in a string variable
+        // Read input character by character to detect Esc key
         char ch;
         while ((ch = _getch()) != '\r') { // '\r' is the Enter key
             if (ch == 27) { // Esc key pressed
                 cout << "\nExiting book return process.\n";
-                student(studentnode,tail);
+                student(studentnode, tail);
             }
             else if (ch == '\b') { // Backspace key pressed
-                if (!bookname.empty()) {//goes back removing chars until bookname is empty
+                if (!bookname.empty()) {
                     bookname.pop_back();
                     cout << "\b \b"; // Move cursor back and erase the character
                 }
@@ -705,8 +754,6 @@ void returnBooks(node*& studentnode, node*& tail) {
                 delete temp;
                 cout << "Book '" << bookname << "' returned successfully!\n";
                 student(studentnode, tail);
-
-                
             }
             temp = temp->next;
         }
