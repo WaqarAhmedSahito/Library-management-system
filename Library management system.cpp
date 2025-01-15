@@ -13,6 +13,7 @@ string idnum;
 string studentpassword;
 string adminpass = "1234";
 bool foundacc = false;
+bool headBack = true;
 
 // Book node class
 class booknode {
@@ -52,17 +53,13 @@ public:
     }
 };
 
-// Global book list pointers
-booknode* bookhead = nullptr;
-booknode* booktail = nullptr;
-
 // Function prototypes
 void login_admin(node*& head);
 void admin(node*& head);
 void loginstudentupdated(node*& head, node*& tail);
 void depositmoney(node*& studentnode, node*& tail);
 void insertend(node*& tail, string username, string password);
-void traverse(node*& head);
+void traverse(node*& head,bool back);
 void genidnum();
 void adminaccount(node*& head, node*& tail);
 void registerstudent(node*& head, node*& tail);
@@ -91,6 +88,10 @@ int getMenuChoice(int minChoice, int maxChoice) {
         }
     }
 }
+// Global book list pointers
+booknode* bookhead = nullptr;
+booknode* booktail = nullptr;
+
 
 string getPasswordInput(const string& prompt) {
     cout << prompt;
@@ -186,15 +187,22 @@ void insertend(node*& tail, string username, string password) {
 }
 
 // Traverse and display all users
-void traverse(node*& head) {
+void traverse(node*& head,bool back) {
     node* temp = head;
-
+    int count = 0;
     while (temp != nullptr) {
         cout << endl;
-        cout << "Username: " << temp->username << ", Password: " << temp->password << ", Balance: " << temp->balance << endl;
+        if(count!=0)
+        {
+            cout << count<<") Username: " << temp->username << ", Password: " << temp->password << ", Balance: " << temp->balance << endl;
+        }
         temp = temp->next;
+        count++;
     }
-    admin(head);
+    headBack = back;
+    if(headBack==true){
+        admin(head);
+    }
     cout << endl;
 }
 
@@ -217,6 +225,9 @@ void traverseBooks(node*& bhead) {
 
 // Delete a user from the user list
 void deleteUser(node*& head, node*& tail) {
+    cout << endl;
+    traverse(head,false);
+    cout << endl;
     if (head == nullptr) {
         cout << "List is empty. Nothing to delete." << endl;
         return;
@@ -231,7 +242,7 @@ void deleteUser(node*& head, node*& tail) {
 
     if (temp == nullptr) {
         cout << "User with username '" << username << "' not found." << endl;
-        return;
+        admin(head);
     }
 
     if (temp == head) {
@@ -255,6 +266,9 @@ void deleteUser(node*& head, node*& tail) {
 
     delete temp;
     cout << "User '" << username << "' deleted." << endl;
+    cout << "Heading to Admin Panel" << endl;
+    cout << endl;
+    admin(head);
 }
 
 // Search for a user in the user list
@@ -509,7 +523,7 @@ void admin(node*& head) {
     }
     case 3: {
         cout << "Generating list of users...\n";
-        traverse(head);
+        traverse(head,true);
         break;
     }
     case 4: {
