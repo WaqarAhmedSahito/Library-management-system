@@ -91,6 +91,27 @@ int getMenuChoice(int minChoice, int maxChoice) {
     }
 }
 
+string getPasswordInput(const string& prompt) {
+    cout << prompt;
+    string password;
+    char ch;
+
+    while ((ch = _getch()) != '\r') { // '\r' is the Enter key
+        if (ch == '\b') { // Backspace key pressed
+            if (!password.empty()) {
+                password.pop_back();
+                cout << "\b \b"; // Move cursor back and erase the character
+            }
+        }
+        else {
+            password += ch;
+            cout << '*'; // Display asterisk instead of the actual character
+        }
+    }
+    cout << endl;
+    return password;
+}
+
 string getNonEmptyString(const string& prompt) {
     string input;
     while (true) {
@@ -168,9 +189,11 @@ void traverse(node*& head) {
     node* temp = head;
 
     while (temp != nullptr) {
-        cout << "Username: " << temp->username << ", Balance: " << temp->balance << endl;
+        cout << endl;
+        cout << "Username: " << temp->username<<", Password: "<<temp->password << ", Balance: " << temp->balance << endl;
         temp = temp->next;
     }
+    admin(head);
     cout << endl;
 }
 
@@ -208,8 +231,9 @@ void adminaccount(node*& head, node*& tail) {
 
 // Register or login as a student
 void registerstudent(node*& head, node*& tail) {
-    int cont = 0;
-    while (cont == 0) {
+    char ch ;
+    bool cont =true;
+    while (cont ==true) {
         cout << "1) Register Account\n2) Login Existing Account\n3) Login as Admin\n4) Exit\n";
         int loginchoice = getMenuChoice(1, 4);
 
@@ -287,8 +311,28 @@ void registerstudent(node*& head, node*& tail) {
             break;
         }
 
-        cout << "Continue? 0=Yes 1=No: ";
-        cin >> cont;
+        cout << "Press Esc for Main Menu OR Press Enter to Login Student Account " << endl;
+        cout << "Shift+0 to Exit" << endl;
+        cout << endl;
+
+        while (true)
+        {
+            if (_kbhit()) {
+                ch = _getch();
+                break;
+            }
+        }
+        if (ch == 13) {
+            loginstudentupdated(head, tail);
+            
+        }
+        else if (ch == 27) {
+            registerstudent(head, tail);
+        }
+        //Shift + `
+        else if (ch == 41) {
+            break;
+        }
         cout << endl;
     }
 }
@@ -296,9 +340,11 @@ void registerstudent(node*& head, node*& tail) {
 // Admin login
 void login_admin(node*& head) {
     string username = getNonEmptyString("Enter admin username: ");
-    string password = getNonEmptyString("Enter admin password: ");
+    string password = getPasswordInput("Enter password: ");
 
     if (username == "admin" && password == adminpass) {
+        cout << endl;
+
         cout << "Admin logged in successfully.\n";
         admin(head);
     }
@@ -309,6 +355,8 @@ void login_admin(node*& head) {
 
 // Student menu
 void student(node*& studentnode, node*& tail) {
+    cout << endl;
+
     cout << "\nStudent Options:\n1. View Books\n2. Borrow Book\n3. Return Book\n4. Deposit Money\n5. Logout User\n6. Exit\n";
     int option = getMenuChoice(1, 6);
 
@@ -346,7 +394,11 @@ void student(node*& studentnode, node*& tail) {
 }
 
 // Student login
+
+
 void loginstudentupdated(node*& head, node*& tail) {
+    cout << endl;
+
     string inputid = getNonEmptyString("Enter username: ");
 
     node* temp = head;
@@ -356,7 +408,7 @@ void loginstudentupdated(node*& head, node*& tail) {
             const int maxattempts = 3;
 
             while (trycnt < maxattempts) {
-                string inputpass = getNonEmptyString("Enter password: ");
+                string inputpass = getPasswordInput("Enter password: ");
 
                 if (inputpass == temp->password) {
                     cout << "Welcome " << inputid << ", you are now logged in as a student.\n";
@@ -381,6 +433,8 @@ void loginstudentupdated(node*& head, node*& tail) {
 
 // Admin menu
 void admin(node*& head) {
+    cout << endl;
+
     cout << "\nAdmin Options:\n1. Add Book\n2. Edit Book\n3. View Books\n4. Generate Users List\n5. Exit\n";
     int option = getMenuChoice(1, 5);
 
@@ -452,6 +506,10 @@ void initializeBooks(node*& head) {
     }
 
     cout << "Books initialized successfully!\n";
+    cout << endl;
+    cout << "Heading Back to Admin Panel..." << endl;
+
+    admin(head);
 }
 
 // Borrow books
@@ -493,7 +551,7 @@ void borrowBooks(node*& studentnode, node*& tail) {
     // Check if the book is available
     if (temp->quantity <= 0) {
         cout << "Book '" << temp->bookname << "' is out of stock.\n";
-        return;
+        student(studentnode, tail);
     }
 
     // Check if the student has already borrowed the book
@@ -531,7 +589,7 @@ void borrowBooks(node*& studentnode, node*& tail) {
     }
 
     // Deduct the cost from the student's balance
-    cout << "Press Esc to go back to Main Menu OR Press Enter to Borrow Another Book.\n";
+    cout << "Press Esc to go back to Student Panel OR Press Enter to Borrow Another Book.\n";
 
     char ch;
     while (true) {
@@ -552,6 +610,17 @@ void borrowBooks(node*& studentnode, node*& tail) {
 }
 
 // Return books
+#include <iostream>
+#include <string>
+#include <conio.h> // For _kbhit() and _getch() (Windows-specific)
+
+using namespace std;
+
+// Function to check if the Esc key is pressed
+bool isEscPressed() {
+    return _kbhit() && _getch() == 27; 
+}
+
 void returnBooks(node*& studentnode, node*& tail) {
     if (studentnode == nullptr) {
         cout << "Error: No student account found.\n";
@@ -562,6 +631,7 @@ void returnBooks(node*& studentnode, node*& tail) {
     booknode* temp1 = bookhead;
     bool hasBooks = false;
 
+    // Display all books borrowed by the student
     while (temp1 != nullptr) {
         if (temp1->username == studentnode->username) {
             cout << "- " << temp1->bookname << endl;
@@ -575,46 +645,75 @@ void returnBooks(node*& studentnode, node*& tail) {
         return;
     }
 
-    string bookname = getNonEmptyString("Enter the name of the book you want to return: ");
+    // Loop to repeatedly ask for the book name
+    while (true) {
+        cout << "Enter the name of the book you want to return (or press Esc to exit): ";
+        string bookname;
 
-    // Search for the book in the book list
-    booknode* temp = bookhead;
-    while (temp != nullptr) {
-        if (temp->username == studentnode->username && temp->bookname == bookname) {
-            // Increment the quantity of the returned book
-            booknode* libraryBook = bookhead;
-            while (libraryBook != nullptr) {
-                if (libraryBook->bookname == bookname && libraryBook->username == "Library") {
-                    libraryBook->quantity++;
-                    break;
+        // Read input character by character to detect Esc key
+        char ch;
+        while ((ch = _getch()) != '\r') { // '\r' is the Enter key
+            if (ch == 27) { // Esc key pressed
+                cout << "\nExiting book return process.\n";
+                student(studentnode,tail);
+            }
+            else if (ch == '\b') { // Backspace key pressed
+                if (!bookname.empty()) {
+                    bookname.pop_back();
+                    cout << "\b \b"; // Move cursor back and erase the character
                 }
-                libraryBook = libraryBook->next;
-            }
-
-            // Remove the borrowed book from the list
-            if (temp->prev != nullptr) {
-                temp->prev->next = temp->next;
             }
             else {
-                bookhead = temp->next;
+                bookname += ch;
+                cout << ch;
             }
-
-            if (temp->next != nullptr) {
-                temp->next->prev = temp->prev;
-            }
-            else {
-                booktail = temp->prev;
-            }
-
-            delete temp;
-            cout << "Book '" << bookname << "' returned successfully!\n";
-            return;
         }
-        temp = temp->next;
-    }
+        cout << endl;
 
-    cout << "You have not borrowed this book.\n";
-    student(studentnode, tail);
+        // Search for the book in the book list
+        booknode* temp = bookhead;
+        bool bookFound = false;
+
+        while (temp != nullptr) {
+            if (temp->username == studentnode->username && temp->bookname == bookname) {
+                // Increment the quantity of the returned book in the library
+                booknode* libraryBook = bookhead;
+                while (libraryBook != nullptr) {
+                    if (libraryBook->bookname == bookname && libraryBook->username == "Library") {
+                        libraryBook->quantity++;
+                        studentnode->balance += 18;
+                        break;
+                    }
+                    libraryBook = libraryBook->next;
+                }
+
+                // Remove the borrowed book from the list
+                if (temp->prev != nullptr) {
+                    temp->prev->next = temp->next;
+                }
+                else {
+                    bookhead = temp->next;
+                }
+
+                if (temp->next != nullptr) {
+                    temp->next->prev = temp->prev;
+                }
+                else {
+                    booktail = temp->prev;
+                }
+
+                delete temp;
+                cout << "Book '" << bookname << "' returned successfully!\n";
+                student(studentnode, tail);
+
+                
+            }
+            temp = temp->next;
+        }
+
+        // If the book is not found
+        cout << "You have not borrowed this book. Please try again.\n";
+    }
 }
 
 // View borrowed books
@@ -665,7 +764,7 @@ int main() {
 
     bookhead = book1;
     booktail = book2;
-
+    cout << "----------WELCOME TO E-LIBRARY----------" << endl;
     registerstudent(head, tail);
 
     return 0;
